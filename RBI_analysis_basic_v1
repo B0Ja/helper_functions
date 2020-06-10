@@ -1,5 +1,15 @@
 #To be moved to the RBI Project directory
 
+"""
+This function has not been tested for all the RBI data on 
+the page. The structure of all the pages are different.
+
+This has been tested and worked on in the Population,
+Urban population and Rural Population pages.
+
+Generally, should work with single table pages.
+"""
+
 def rbi_chart(data):
     
     """Get the data from RBI and plot the heatmap and delta map"""
