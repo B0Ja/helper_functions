@@ -1,0 +1,278 @@
+'General Introduction
+
+'Important Note: The following URLs contain much larger set of macros but most of it can be handled easily. 
+'This is curated list of few macros that can add value.
+'Subsequent comments will highlight where the VBAs are from including Authors and URLs. 
+'I will note separately if they are written by me or taken from offline sources.
+
+'Pro Tips:
+'1. Add these macros to your PersonalWorkbook to access it across workbooks.
+'2. Add a keyboard shortcut if you tend to use it very frequently.
+'''You can use the following format for creating shortcuts:
+'''Sub CreateShortcut()
+'''Application.OnKey “+^{}”, “FunctionName” 'Where double quotes is where you add your keystroke such as "+^{DT}"
+'''End Sub
+
+'Batch 1:
+'This is bunch of good excel VBA's from Excel Champs.
+'Complete credit to Excel Champs. Copied here for my easy access and with a view of building this list as I go along. 
+'Excel Champ list url:  https://excelchamps.com/blog/useful-macro-codes-for-vba-newcomers/
+
+
+'To insert multiple columns. Adds sequentially.
+
+Sub InsertMultipleColumns()
+Dim i As Integer
+Dim j As Integer
+ActiveCell.EntireColumn.Select
+On Error GoTo Last
+i = InputBox("Enter number of columns to insert", "Insert Columns")
+For j = 1 To i
+Selection.Insert Shift:=xlToRight, CopyOrigin:=xlFormatFromRightorAbove
+Next j
+Last: Exit Sub
+End Sub
+
+'
+'To insert multiple rows. Adds sequentially.
+
+Sub InsertMultipleRows()
+Dim i As Integer
+Dim j As Integer
+ActiveCell.EntireRow.Select
+On Error GoTo Last
+i = InputBox("Enter number of rows to insert", "Insert Rows")
+For j = 1 To i
+Selection.Insert Shift:=xlToDown, CopyOrigin:=xlFormatFromRightorAbove
+Next j
+Last: Exit Sub
+End Sub
+
+
+'
+'Autofitting columns across a worksheet
+
+Sub AutoFitColumns()
+Cells.Select
+Cells.EntireColumn.AutoFit
+End Sub
+
+'
+'Autofitting rows across a worksheet
+
+Sub AutoFitRows()
+Cells.Select
+Cells.EntireRow.AutoFit
+End Sub
+
+'
+'Highlighting Cells which have comments in them
+'Most highlighting function is better off done with Conditional Formatting,
+'This is something that is not yet available
+
+Sub highlightCommentCells()
+Selection.SpecialCells(xlCellTypeComments).Select
+Selection.Style = "Note"
+End Sub
+
+'
+'This is a useful function, especially you dont to turn your data into table
+
+Sub highlightAlternateRows()
+Dim rng As Range
+For Each rng In Selection.Rows
+If rng.Row Mod 2 = 1 Then
+rng.Style = "20% -Accent1"
+rng.Value = rng ^ (1 / 3)
+Else
+End If
+Next rng
+End Sub
+
+'
+'Highlighting of misspelled words. This is useful.
+
+Sub HighlightMisspelledCells()
+Dim rng As Range
+For Each rng In ActiveSheet.UsedRange
+If Not Application.CheckSpelling(word:=rng.Text) Then
+rng.Style = "Bad"
+End If
+Next rng
+End Sub
+
+'
+'Highlighting specific values. Possible with Conditional Formating as well. 
+
+Sub highlightSpecificValues()
+Dim rng As Range
+Dim i As Integer
+Dim c As Variant
+c = InputBox("Enter Value To Highlight")
+For Each rng In ActiveSheet.UsedRange
+If rng = c Then
+rng.Style = "Note"
+i = i + 1
+End If
+Next rng
+MsgBox "There are total " & i & " " & c & " in this worksheet."
+End Sub
+
+'
+'Identifying cells with invisible spaces. Useful in some circumstances.
+
+Sub blankWithSpace()
+Dim rng As Range
+For Each rng In ActiveSheet.UsedRange
+If rng.Value = " " Then
+rng.Style = "Note"
+End If
+Next rng
+End Sub
+
+'
+'Locking all the cells with Formulas in them. Useful.
+
+Sub lockCellsWithFormulas()
+With ActiveSheet
+.Unprotect
+.Cells.Locked = False
+.Cells.SpecialCells(xlCellTypeFormulas).Locked = True
+.Protect AllowDeletingRows:=True
+End With
+End Sub
+
+'
+'Not sure why this may be needed, but Excel Champ has given us an option. 
+
+Sub deleteBlankWorksheets()
+Dim Ws As Worksheet
+On Error Resume Next
+Application.ScreenUpdating = False
+Application.DisplayAlerts = False
+For Each Ws In Application.Worksheets
+If Application.WorksheetFunction.CountA(Ws.UsedRange) = 0 Then
+Ws.Delete
+End If
+Next
+Application.ScreenUpdating = True
+Application.DisplayAlerts = True
+End Sub
+
+'
+'Proably the best of the macros. Highly recommended by Excel Champ, and me.
+
+Sub FileBackUp()
+ThisWorkbook.SaveCopyAs FileName:=ThisWorkbook.Path & _
+"" & Format(Date, "mm-dd-yy") & " " & _
+ThisWorkbook.Name
+End Sub
+
+'
+'Interesting one. Especially when you realize you can customize this!
+
+Sub auto_open()
+MsgBox _
+"Welcome To Excel!"
+End Sub
+
+'
+'Creating Table of Contents. Very useful.
+
+Sub TableofContent()
+Dim i As Long
+On Error Resume Next
+Application.DisplayAlerts = False
+Worksheets("Table of Content").Delete
+Application.DisplayAlerts = True
+On Error GoTo 0
+ThisWorkbook.Sheets.Add Before:=ThisWorkbook.Worksheets(1)
+ActiveSheet.Name = "Table of Content"
+For i = 1 To Sheets.Count
+With ActiveSheet
+.Hyperlinks.Add _
+Anchor:=ActiveSheet.Cells(i, 1), _
+Address:="", _
+SubAddress:="'" & Sheets(i).Name & "'!A1", _
+ScreenTip:=Sheets(i).Name, _
+TextToDisplay:=Sheets(i).Name
+End With
+Next i
+End Sub
+
+'
+'Goal Seek with VBA. For that edge case.
+
+Sub GoalSeekVBA()
+Dim Target As Long
+On Error GoTo Errorhandler
+Target = InputBox("Enter the required value", "Enter Value")
+Worksheets("Goal_Seek").Activate
+With ActiveSheet.Range("C7")
+.GoalSeek_ Goal:=Target, _
+ChangingCell:=Range("C2")
+End With
+Exit Sub
+Errorhandler: MsgBox ("Sorry, value is not valid.")
+End Sub
+
+'
+'Removing Spaces in ranges
+
+Sub RemoveSpaces()
+Dim myRange As Range
+Dim myCell As Range
+Select Case MsgBox("You Can't Undo This Action. " _
+& "Save Workbook First?", _
+vbYesNoCancel, "Alert")
+Case Is = vbYesThisWorkbook.Save
+Case Is = vbCancel
+Exit Sub
+End Select
+Set myRange = Selection
+For Each myCell In myRange
+If Not IsEmpty(myCell) Then
+myCell = Trim(myCell)
+End If
+Next myCell
+End Sub
+
+'
+'Word Counts. Useful in Visualization if you ask me.
+
+Sub Word_Count_Worksheet()
+Dim WordCnt As Long
+Dim rng As Range
+Dim S As String
+Dim N As Long
+For Each rng In ActiveSheet.UsedRange.Cells
+S = Application.WorksheetFunction.Trim(rng.Text)
+N = 0
+If S <> vbNullString Then
+N = Len(S) - Len(Replace(S, " ", "")) + 1
+End If
+WordCnt = WordCnt + N
+Next rng
+MsgBox "There are total " _
+& Format(WordCnt, "#,##0") & _
+" words in the active worksheet"
+End Sub
+
+'
+'Replace blanks with Zeros. Better option than Ctrl+H. 
+
+Sub replaceBlankWithZero()
+Dim rng As Range
+Selection.Value = Selection.Value
+For Each rng In Selection
+If rng = "" Or rng = " " Then
+rng.Value = "0"
+Else
+End If
+Next rng
+End Sub
+
+'
+'Excel Champ: https://www.youtube.com/c/excelchamps?
+
+
