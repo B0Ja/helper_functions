@@ -119,15 +119,15 @@ if [ -d $urlvar1/$folder ]
 then
         mv $path2 $urlvar1		#Move the file
 	sudo chmod -R 777 $urlvar1	#Giver permissions to the entire folder
-	sed -i 's/$db_username = "root"\;/$db_username = "bee"\;'	#Change username from default Root to Bee
-	sed -i 's/$db_password = ""\;/$db_password = "bug"\;'
+	sed -i 's/$db_username = "root"\;/$db_username = "bee"\;/g'	#Change username from default Root to Bee
+	sed -i 's/$db_password = ""\;/$db_password = "bug"\;/g'
 
 elif [ -d $urlvar2/$folder ]
 then
 	mv $path2 $urlvar2
 	sudo chmod -R 777 $urlvar2
-	sed -i 's/$db_username = "root"\;/$db_username = "bee"\;'
-	sed -i 's/$db_password = ""\;/$db_password = "bug"\;'
+	sed -i 's/$db_username = "root"\;/$db_username = "bee"\;/g'
+	sed -i 's/$db_password = ""\;/$db_password = "bug"\;/g'
 
 else
 	echo "Unable to copy to Webserver directory"
