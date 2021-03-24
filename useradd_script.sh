@@ -59,6 +59,8 @@ else
 		if [ $? -eq 0 ]
 		then
 			let created=$created+1
+			#Another option for this line
+			#created='expr $created+1'
 		fi
 		
     #Use a column value for Password
