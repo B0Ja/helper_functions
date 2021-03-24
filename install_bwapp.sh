@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # The script to run and install the BWAPP application and set it up
 
 fail() {
@@ -33,28 +35,28 @@ require_sudo () {
 if [ “$(which mysql)” != "" ]
 then
 {
-sudo apt install mysql-server
+sudo apt install mysql-server -y
 }
 fi
 
 if [ “$(which apache2)” != "" ]
 then
 {
-sudo apt install apache2
+sudo apt install apache2 -y
 }
 fi
 
 if [ “$(which php)” != "" ]
 then
 {
-sudo apt install php
+sudo apt install php -y
 }
 fi
 
 if [ “$(which firefox)” != "" ]
 then
 {
-sudo apt install firefox
+sudo apt install firefox -y
 }
 fi
 
