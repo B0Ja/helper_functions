@@ -24,7 +24,7 @@ else
 	
 	#Getting and Names and using just First alhpabet and Last name with Awk
 	column4=('cut -d: -f 5 “$filein” | tr [A-Z] [a-z] | awk ‘{print substr($1,1,1} $2}’')
-  #Useful snippet, for values like Usernames
+  	#Useful snippet, for values like Usernames
 	
 	#Snippet:
 	# Anything going within the parantheis () becomes an array
@@ -49,12 +49,12 @@ else
 	do
 		useradd -nMN -c ${fullnamesoftheuser[$x]} -g “$(groups[$x])” $user 2> /dev/nul
     
-    #Options:
-    #M = No user home directory (good for testing)
-    #N = Don't assign groups (good for testing)
-    #n = Do not create the User-group (good)
-    #c = Comment
-    #g = group to be assigned
+    		#Options:
+  		#M = No user home directory (good for testing)
+    		#N = Don't assign groups (good for testing)
+    		#n = Do not create the User-group (good)
+    		#c = Comment
+    		#g = group to be assigned
     
 		if [ $? -eq 0 ]
 		then
@@ -63,9 +63,15 @@ else
 			#created='expr $created+1'
 		fi
 		
-    #Use a column value for Password
-    #Use AWK or SED to substitute for stronger passwords
+   		 #Example: Use a column value for Password
+   		 #Use AWK or SED to substitute for stronger passwords
+		
 		echo “$(column3[$x]}” | passwd --stdin “$user” > /dev/null
+		
+		#Above returns an error due to invalid option to command passwd
+		#Option is to use chpass to set the password. chpass accepts the piped input.
+		#echo "$(column3[$x]}" | chpass $user
+	
 	done
 
 fi 	
