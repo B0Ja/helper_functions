@@ -23,7 +23,7 @@ else
 	column3=('cut -d: -f 4 “$filein”')
 	
 	#Getting and Names and using just First alhpabet and Last name with Awk
-	column4=('cut -d: -f 5 “$filein” | tr [A-Z] [a-z] | awk ‘{print substr($1,1,1} $2}’')
+	column4=('cut -d: -f 5 “$filein” | tr [A-Za-z] | awk ‘{print substr($1,1,1} $2}’')
   	#Useful snippet, for values like Usernames
 	
 	#Snippet:
