@@ -2,14 +2,6 @@
  
 # The script to run and install the BWAPP application and set it up
  
-fail() {
-	#Something failed, exit.
- 
-	echo "$@, exiting." >&2
-	exit 1
-}
- 
- 
 #Check to see if the Sudo permissions are provided.
  
 require_sudo () {
@@ -30,7 +22,6 @@ require_sudo () {
     fail 'Missing administrator priviledges. Please run with sudo priviliges.'
 }
  
-fail
 require_sudo
  
 #check if requirements are installed
