@@ -33,8 +33,6 @@ install_tools() {
         then
                 for package in $packages; do
                         $SUDO apt -q -y install $package
-                        #if ! type -path "$binary" >/dev/null; then
-                        #$SUDO apt -q -y install $package
                 done
         else
                 echo "$binary is installed"
