@@ -1,34 +1,35 @@
 #!/bin/bash
 
 #Creating users from a list / CSV of users and their details
-#Courtesy Earleywine (YT)
+#Courtesy: Earleywine (YT)
 
 
-#Get the file
+#The file which contains the list of users to be added
 filein='userstobeadded.csv'
 IFS=$'\n'
 
-#Script begins
+
+#Script begins here
 
 if [ ! -f “$filein” ]  #Check if the file exists
 then
 	echo “File does not exist: $filein”
+
 else
 
 	#Create arrays for each columns so that they can be used
 	#for working with data and index
 	
 	column1=('cut -d: -f 2 “$filein” | sed ‘s/ //’')  #sed removes the spaces in between the column values
-	column2=('cut -d -f 3 “$filein”')
+	column2=('cut -d: -f 3 “$filein”')
 	column3=('cut -d: -f 4 “$filein”')
 	
 	#Getting and Names and using just First alhpabet and Last name with Awk
+	#Useful snippet, for values like Usernames
 	column4=('cut -d: -f 5 “$filein” | tr [A-Za-z] | awk ‘{print substr($1,1,1} $2}’')
-  	#Useful snippet, for values like Usernames
-	
+  	
 	#Snippet:
 	# Anything going within the parantheis () becomes an array
-
 
   #Create Group if it does not exist
 	for group in ${groups[*]}
