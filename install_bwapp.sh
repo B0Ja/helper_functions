@@ -8,50 +8,48 @@ require_sudo () {
     #Stops the script if the user does not have root priviledges and cannot sudo
     #Additionally, sets $SUDO to "sudo" and $SUDO_E to "sudo -E" if needed.
  
-    if [ "$EUID" -eq 0 ]; then
-        SUDO=""
-        SUDO_E=""
-        return 0
-    fi
- 
-    if sudo -v; then
-        SUDO="sudo"
-        SUDO_E="sudo -E"
-        return 0
-    fi
-    fail 'Missing administrator priviledges. Please run with sudo priviliges.'
+
+	if [ "$EUID" -eq 0 ]; then
+	        	SUDO=""
+        		SUDO_E=""
+        		return 0
+    	fi
+
+	if sudo -v; then
+        		SUDO="sudo"
+		SUDO_E="sudo -E"
+		return 0
+	fi
 }
- 
+
 require_sudo
- 
-#check if requirements are installed
-if [ “$(which mysql)” != "" ]
-then
-{
-sudo apt install mysql-server -y
+
+install_tools() {
+
+        binary="$1"
+        packages="$2"
+
+        if [ "$(which $1)" != "" ]
+        then
+                for package in $packages; do
+                        $SUDO apt -q -y install $package
+                        #if ! type -path "$binary" >/dev/null; then
+                        #$SUDO apt -q -y install $package
+                done
+        else
+                echo "$binary is installed"
+        fi
 }
-fi
- 
-if [ “$(which apache2)” != "" ]
-then
-{
-sudo apt install apache2 -y
+        fi
 }
-fi
- 
-if [ “$(which php)” != "" ]
-then
-{
-sudo apt install php -y
-}
-fi
- 
-if [ “$(which firefox)” != "" ]
-then
-{
-sudo apt install firefox -y
-}
-fi
+
+
+#Check and Install these
+install_tools mysql "mysql-server"
+install_tools apache2 "apache2"
+install_tools php "php"
+install_tools firefox "firefox"
+
  
  
 #Create a temporary directory in the Downloads folder
