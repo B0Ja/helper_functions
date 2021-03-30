@@ -83,18 +83,13 @@ unzip -qq $path/$filename -d $path2
  
 #Move the files to the Webserver directory
  
-#There are two possible URLs for Apache
 urlvar1='/var/www/html'
-urlvar2='/var/www/HTML'
  
 if [ -d /var/www ]
 then
 	if [ -d $urlvar1 ]
 	then
 		sudo -A mv $path2 $urlvar1
-	elif [ -d $urlvar2 ]
-	then
-     		sudo -A mv $path2 $urlvar2
 	else
      	echo "Webserver directory not created. Check if you have Apache2."
 	fi
@@ -109,33 +104,22 @@ then
 	sudo chmod -R 777 $urlvar1	#Giver permissions to the entire folder
 	#sed -i 's/$db_username = "root"\;/$db_username = "bee"\;/g'	#Change username from default Root to Bee
 	#sed -i 's/$db_password = ""\;/$db_password = "bug"\;/g'
- 
-elif [ -d $urlvar2/$folder ]
-then
-	sudo -A mv $path2 $urlvar2
-	sudo chmod -R 777 $urlvar2
-	#sed -i 's/$db_username = "root"\;/$db_username = "bee"\;/g'
-	#sed -i 's/$db_password = ""\;/$db_password = "bug"\;/g'
- 
+  
 else
 	echo "Unable to copy to Webserver directory"
 fi
- 
- 
+
  
 #Start the services
- 
 sudo service mysql start
 sudo service apache2 start
  
- 
 #Start MySQL server and login
-#mysql -u root -p
+mysql -u root -p
  
- 
+#Manage MySQL 
 create_user="create user 'bee'@'localhost' identified by 'bug';"
 grant_rights="grant all privileges on *.* to 'bee'@'localhost';"
- 
  
 #Creating user
 mysql -u root -p -e "$create_user"  && echo "**User created: Username: bee; Password: bug**"
@@ -148,9 +132,7 @@ mysql -u root -p -e "$grant_rights" $$ echo "**Rights granted to user Bee**"
 sudo service mysql restart
 sudo service apache2 restart
  
- 
-#start the browser for installation
- 
+#start the browser for final installation
 firefox localhost/bwapp/bWAPP/install.php
  
 #EOS
