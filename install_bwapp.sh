@@ -38,8 +38,6 @@ install_tools() {
                 echo "$binary is installed"
         fi
 }
-        fi
-}
 
 
 #Check and Install these
