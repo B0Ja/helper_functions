@@ -41,20 +41,21 @@ install_vbox() {
 
 
 #Create a Temp folder
-
+cd $(mktemp -d)
 
 #Downloading the KALI OVA
 gpg --keyserver hkp://keys.gnupg.net --recv-key 44C6513A8E4FB3D30875F758ED444FF07D8D0BF6
 
-
 #Download the VBOX images
 wget -q https://images.kali.org/virtual-images/kali-linux-2021.1-vbox-amd64.ova
-#Sha256: b907b61ed584c8eef57dcb81e45f8e8af608cc1e0f203711e6c57653b938ef69
 
+#Verify Checksum
+hash="b907b61ed584c8eef57dcb81e45f8e8af608cc1e0f203711e6c57653b938ef69"
+shasum kali-linux-2021.1-vbox-amd64.ova | awk '$1=="$hash"{print"...Checksum Matched..."}'
 
 #Verify the integrity of downloads
-wget -q https://cdimage.kali.org/current/SHA256SUMS{.gpg,}
-gpg --verify SHA256SUMS.gpg SHA256SUMS
+#wget -q https://cdimage.kali.org/current/SHA256SUMS{.gpg,}
+#gpg --verify SHA256SUMS.gpg SHA256SUMS
 
 
 
