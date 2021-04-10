@@ -44,7 +44,7 @@ install_vbox() {
 cd $(mktemp -d)
 
 #Downloading the KALI OVA
-gpg --keyserver hkp://keys.gnupg.net --recv-key 44C6513A8E4FB3D30875F758ED444FF07D8D0BF6
+#gpg --keyserver hkp://keys.gnupg.net --recv-key 44C6513A8E4FB3D30875F758ED444FF07D8D0BF6
 
 #Download the VBOX images
 wget -q https://images.kali.org/virtual-images/kali-linux-2021.1-vbox-amd64.ova
