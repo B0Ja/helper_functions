@@ -57,7 +57,7 @@ install_vbox virtualbox "virtualbox"
 ############################################################
 
 #Create a Temp folder
-cd $(mktemp -d -p)
+cd $(mktemp -d)
 
 #Check the current directory:
 dir_path=$PWD
