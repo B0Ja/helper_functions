@@ -37,7 +37,7 @@ install_vbox() {
         if [ "$(which $1)" != "" ]
         then
                 for package in $packages; do
-			echo "Installing $packages
+			echo "Installing $packages"
                         $SUDO apt -q -y install $packages
                 done
         else
