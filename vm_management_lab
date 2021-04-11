@@ -5,7 +5,7 @@
 #   IMPORTANT: Do not Use. Needs Test. Work in Progress.   #
 #							   #
 ############################################################
-
+############################################################
 # A script to help download Virtualbox, download and verify Kali OVA,
 # and get the appliance up and running in the Cyber range lab
 
@@ -44,6 +44,7 @@ install_vbox() {
         fi
 }
 
+############################################################
 
 #Create a Temp folder
 temp_folder='mktemp -d -p'
@@ -67,8 +68,16 @@ shasum $OVA_NAME | awk '$1=="$hash"{print"...Checksum Matched..."}'
 #gpg --verify SHA256SUMS.gpg SHA256SUMS
 
 
-##Setting up the VM
+###########################################################
+##Run the script below:
+#Check for the sudo permissions
+require_sudo
 
+#Check and Install these
+install_vbox virtualbox "virtualbox"
+
+###########################################################
+##Setting up the VM
 #Check the VM parameters needed:
 VBoxManage import $OVA_NAME --dry-run
 
@@ -77,10 +86,4 @@ VBoxManage import $OVA_NAME --vmname kali --options keepallmacs \
 			    --cpus 2 --memory 2048 --vram 4 --eula accept \
 			    --vsys 0 --nic1 bridged --bridgeadapter1 eth0
 
-
-##Run the script below:
-#Check for the sudo permissions
-require_sudo
-
-#Check and Install these
-install_vbox virtualbox "virtualbox"
+###########################################################
