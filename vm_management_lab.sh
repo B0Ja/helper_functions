@@ -29,7 +29,7 @@ require_sudo () {
 
 
 # Checking for Virtualbox and installing it
-install_vbox() {
+install_package() {
 
         binary="$1"
         packages="$2"
@@ -52,7 +52,8 @@ install_vbox() {
 require_sudo
 
 #Check and Install these
-install_vbox virtualbox "virtualbox"
+#format: install_package packagename packagename
+install_package virtualbox virtualbox
 
 ############################################################
 
