@@ -56,6 +56,22 @@ folder='bwapp'
 #Move the files to the Webserver directory
 urlvar1='/var/www/html'
  
+echo "Checking for the Apache install and prerequisites."
+if [ -d $urlvar1 ]; then
+	echo "Apache is installed."
+	if [ ! -d $urlvar1/$folder ]; then
+		$SUDO mkdir -p $urlvar1/$folder
+	else
+		echo "Bwapp folder exists."
+	fi
+ else
+ 	#Check for Apache
+	if [ $(which apache2) = "" ]; then
+		$SUDO apt -qq -y install apache2 && echo "Apache installed"
+	else
+		echo "Unable to install Apache2."
+ fi
+ 
 if [ -d $urlvar1/$folder ]
 then
 	wget -P $path "http://sourceforge.net/projects/bwapp/files/latest/download" -O $filename
@@ -80,11 +96,10 @@ fi
 #Start the services
 sudo service mysql start
 sudo service apache2 start
- 
-#Start MySQL server and login
-mysql --user=root --password=toor	#Setting password in the command line is not a good policy
- 
-#Manage MySQL 
+  
+#Start and Manage MySQL 
+
+#Queries
 create_user="create user 'bee'@'localhost' identified by 'bug';"
 grant_rights="grant all privileges on *.* to 'bee'@'localhost';"
  
@@ -92,6 +107,7 @@ grant_rights="grant all privileges on *.* to 'bee'@'localhost';"
 mysql --user=root --password=toor -e "$create_user"  && echo "** User created: Username: bee; Password: bug **"
 echo " "
 echo " "
+#Granting rights
 mysql --user=root --password=toor -e "$grant_rights" $$ echo "**Rights granted to user Bee**"
  
 
