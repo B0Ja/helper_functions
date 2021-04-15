@@ -74,12 +74,15 @@ if [ -d $urlvar1 ]; then
  fi
  
 if [ -d $urlvar1/$folder ]
-then
-	wget -P $path "http://sourceforge.net/projects/bwapp/files/latest/download" -O $filename
-	unzip '${$urlvar1}/${folder}${filename}' .
+then	
+	echo Downloading $filename ...	
+	wget "http://sourceforge.net/projects/bwapp/files/latest/download" -O $filename -qq --show-progress
+	unzip -qq "/home/$USER/Downloads/$filename" -d "$urlvar1/$folder/" && echo Unzip successful
+	#unzip '$urlvar1/$folder/$filename' .
 	sudo chmod -R 777 $urlvar1	#Giver permissions to the entire folder
-	sed -i 's/$db_username = "root"\;/$db_username = "bee"\;/g'	#Change username from default Root to “bee”
-	sed -i 's/$db_password = ""\;/$db_password = "bug"\;/g'		#Change the password to “bug”
+	echo "Changing the Admin settings: "
+	sed -i 's/$db_username = "root"\;/$db_username = "bee"\;/g' "$urlvar1/$folder/bWAPP/admin/settings.php"	&& echo Change username from default Root to \“bee\”
+	sed -i 's/$db_password = ""\;/$db_password = "bug"\;/g'	"$urlvar1/$folder/bWAPP/admin/settings.php" && echo Change the password to “bug”
   
 else
 	echo "Unable to copy to Webserver directory"
@@ -89,7 +92,7 @@ else
 		$SUDO apt -qq -y install apache2 && echo "Apache2 installed"
         else
                 echo "Unable to install Apache2."
-     fi
+        fi
 
 fi
 
@@ -118,5 +121,4 @@ sudo service apache2 restart
  
 #start the browser for final installation
 firefox localhost/bwapp/bWAPP/install.php
- 
-#EOS
+#EOF
