@@ -27,7 +27,7 @@ require_sudo
 install_tools() {
 
         binary="$1"
-        packages="$2"
+        packages=$2
 
         if [ "$(which $1)" != "" ]
         then
