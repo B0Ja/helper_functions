@@ -83,7 +83,7 @@ then
 	sed -i 's/$db_password = ""\;/$db_password = "bug"\;/g'		#Change the password to “bug”
   
 else
-	echo "Unable to copy to Webserver directory.”
+	echo 'Unable to copy to Webserver directory'
 	echo “Checking and installing webserver.”
 	if [ "$(which apache2)” = "" ]
         then
@@ -107,7 +107,7 @@ create_user="create user 'bee'@'localhost' identified by 'bug';"
 grant_rights="grant all privileges on *.* to 'bee'@'localhost';"
  
 #Creating user
-mysql --user=root --password=toor -e "$create_user"  && echo "**User created: Username: bee; Password: bug**"
+mysql --user=root --password=toor -e "$create_user"  && echo "** User created: Username: bee; Password: bug **"
 echo " "
 echo " "
 mysql --user=root --password=toor -e "$grant_rights" $$ echo "**Rights granted to user Bee**"
