@@ -77,7 +77,7 @@ if [ -d $urlvar1/$folder ]
 then	
 	echo Downloading $filename ...	
 	wget "http://sourceforge.net/projects/bwapp/files/latest/download" -O $filename -qq --show-progress
-	unzip -qq "/home/$USER/Downloads/$filename" -d "$urlvar1/$folder/" && echo Unzip successful
+	$SUDO unzip -qq "/home/$USER/Downloads/$filename" -d "$urlvar1/$folder/" && echo Unzip successful
 	#unzip '$urlvar1/$folder/$filename' .
 	sudo chmod -R 777 $urlvar1	#Giver permissions to the entire folder
 	echo "Changing the Admin settings: "
@@ -108,12 +108,14 @@ create_user="create user 'bee'@'localhost' identified by 'bug';"
 grant_rights="grant all privileges on *.* to 'bee'@'localhost';"
  
 #Creating user
-mysql --user=root --password=toor -e "$create_user"  && echo "** User created: Username: bee; Password: bug **"
+mysql --user=root -p -e "$create_user"  && echo "** User created: Username: bee; Password: bug **"
 echo " "
-echo " "
+mysql --user=root -p -e "CREATE DATABASE bwapp;" && echo "Creating database"
 #Granting rights
-mysql --user=root --password=toor -e "$grant_rights" $$ echo "**Rights granted to user Bee**"
- 
+mysql --user=root -p -e "$grant_rights" $$ echo "** Rights granted to user Bee**"
+
+#Flush Privileges
+mysql --user=root -p -e "FLUSH PRIVILEGES;" $$ echo "** Activating privileges."
 
 #Restart the services
 sudo service mysql restart
