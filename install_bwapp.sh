@@ -46,43 +46,18 @@ install_tools apache2 "apache2"
 install_tools php "php"
 install_tools firefox "firefox"
 
+
  
- 
-#Create a temporary directory in the Downloads folder
+#Setting Variables
 user=$USER
-folder='bwapp'
- 
-path='/home/'$user'/Downloads/temp_bwapp'
-path2=$path/$folder
-#path2='/home/'$user'/Downloads/temp_bwapp/bwapp'
- 
- 
-#Check if the directory exists, else create the directory
-if [ ! -d $path ]
-then
-    mkdir -p $path
-fi
- 
-if [ ! -d $path2 ]
-then
-    mkdir -p $path2
-fi
- 
+
 #Set the version to be downloaded
 filename='bWAPP_latest'
- 
-#Download the file to the temo_bwapp directory
-wget -P $path "http://sourceforge.net/projects/bwapp/files/latest/download" -O $filename
-mv $filename $path
- 
-#Unzip 
-unzip -qq $path/$filename -d $path2
-#unzip '${path}${filename}' .
- 
- 
- 
+
+folder='bwapp'
+  
+   
 #Move the files to the Webserver directory
- 
 urlvar1='/var/www/html'
  
 if [ -d /var/www ]
@@ -100,13 +75,23 @@ fi
  
 if [ -d $urlvar1/$folder ]
 then
-        sudo -A mv $path2 $urlvar1		#Move the file
+     filename='bWAPP_latest'
+	wget -P $path "http://sourceforge.net/projects/bwapp/files/latest/download" -O $filename
+	unzip '${$urlvar1}/${folder}${filename}' .
 	sudo chmod -R 777 $urlvar1	#Giver permissions to the entire folder
-	#sed -i 's/$db_username = "root"\;/$db_username = "bee"\;/g'	#Change username from default Root to Bee
-	#sed -i 's/$db_password = ""\;/$db_password = "bug"\;/g'
+	sed -i 's/$db_username = "root"\;/$db_username = "bee"\;/g'	#Change username from default Root to “bee”
+	sed -i 's/$db_password = ""\;/$db_password = "bug"\;/g'		#Change the password to “bug”
   
 else
-	echo "Unable to copy to Webserver directory"
+	echo "Unable to copy to Webserver directory.”
+	echo “Checking and installing webserver.”
+	if [ "$(which apache2)” = "" ]
+        then
+			$SUDO apt -q -y install $package
+        else
+                echo “Unable to install Apache2."
+     fi
+
 fi
 
  
@@ -115,17 +100,17 @@ sudo service mysql start
 sudo service apache2 start
  
 #Start MySQL server and login
-mysql -u root -p
+mysql --user=root --password=toor	#Setting password in the command line is not a good policy
  
 #Manage MySQL 
 create_user="create user 'bee'@'localhost' identified by 'bug';"
 grant_rights="grant all privileges on *.* to 'bee'@'localhost';"
  
 #Creating user
-mysql -u root -p -e "$create_user"  && echo "**User created: Username: bee; Password: bug**"
+mysql --user=root --password=toor -e "$create_user"  && echo "**User created: Username: bee; Password: bug**"
 echo " "
 echo " "
-mysql -u root -p -e "$grant_rights" $$ echo "**Rights granted to user Bee**"
+mysql --user=root --password=toor -e "$grant_rights" $$ echo "**Rights granted to user Bee**"
  
  
 #Restart the services
