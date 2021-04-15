@@ -1,4 +1,4 @@
-#!/bin/bash
+!/bin/bash
  
 # The script to run and install the BWAPP application and set it up
  
@@ -104,18 +104,22 @@ sudo service apache2 start
 #Start and Manage MySQL 
 
 #Queries
-create_user="create user 'bee'@'localhost' identified by 'bug';"
-grant_rights="grant all privileges on *.* to 'bee'@'localhost';"
- 
-#Creating user
-mysql --user=root -p -e "$create_user"  && echo "** User created: Username: bee; Password: bug **"
-echo " "
-mysql --user=root -p -e "CREATE DATABASE bwapp;" && echo "Creating database"
-#Granting rights
-mysql --user=root -p -e "$grant_rights" $$ echo "** Rights granted to user Bee**"
+create_user="CREATE USER 'bee'@'localhost' IDENTIFIED BY 'bug';"
+grant_rights="GRANT ALL PRIVILEGES ON *.* TO 'bee'@'localhost';"
 
-#Flush Privileges
-mysql --user=root -p -e "FLUSH PRIVILEGES;" $$ echo "** Activating privileges."
+#Queries that helps during reinstall
+#Drops the users, so it is created afresh
+drop_user="DROP USER bee@localhost;"
+drop_db="DROP DATABASE bWAPP;"
+
+#Creating environment
+#mysql --user=root -p -e "create database bWAPP;"
+mysql --user=root -p -e "$drop_user; $drop_db; FLUSH PRIVILEGES;"
+mysql --user=root -p -e "$create_user"  && echo "** User created: Username: bee; Password: bug **"
+mysql --user=root -p -e "$grant_rights"  && echo "** Rights granted for: Username: bee; Password: bug **"
+
+#Activating privileges
+mysql --user=root -p -e "FLUSH PRIVILEGES;"  && echo "Activating privileges..."
 
 #Restart the services
 sudo service mysql restart
