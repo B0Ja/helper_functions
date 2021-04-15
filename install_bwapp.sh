@@ -70,6 +70,7 @@ if [ -d $urlvar1 ]; then
 		$SUDO apt -qq -y install apache2 && echo "Apache installed"
 	else
 		echo "Unable to install Apache2."
+	fi
  fi
  
 if [ -d $urlvar1/$folder ]
