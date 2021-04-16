@@ -1,4 +1,4 @@
-!/bin/bash
+#!/bin/bash
  
 # The script to run and install the BWAPP application and set it up
  
