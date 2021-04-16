@@ -50,7 +50,14 @@ install_tools firefox "firefox"
 user=$USER
 
 #Set the version and the directory name
+
+#Version
 filename='bWAPP_latest'
+
+#If you have problems in downloading the file in lab env,
+#uncomment the below line. Comment the above variable. (Not tested)
+#filename='bWAPPv2.2'
+
 folder='bwapp'
   
 #Move the files to the Webserver directory
