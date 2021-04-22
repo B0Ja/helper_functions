@@ -88,7 +88,8 @@ if [ ! vm_image=="$OVA_NAME" ]; then
         vm_name2=`echo $vm_url | awk -F/ '{print $NF}'`
         echo "The hash of downloaded file is: " $(sha256sum "$vm_name2" | awk '{print $1}')
     else
-        echo Download $_FAILED >&2        
+        echo Download $_FAILED >&2
+    fi
 else 
     echo "Selection image is a Kali latest image (default)."
 
@@ -98,6 +99,7 @@ else
         shasum $OVA_NAME | awk '$1!="$hash"{print"...\e[91mChecksum did not match.\e[0m"}'
     else
         echo Download of $OVA_NAME $_FAILED.
+    fi
 fi
 
 vm_dry_run() {
