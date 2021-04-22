@@ -86,7 +86,7 @@ if [ ! vm_image=="$OVA_NAME" ]; then
     if "${download_vm}"; then
         echo Download $_SUCCESS >&2
         vm_name2=`echo $vm_url | awk -F/ '{print $NF}'`
-        echo "The hash of downloaded file is: " $(sha256sum "$vm_name2" | awk '{print $1}'}
+        echo "The hash of downloaded file is: " $(sha256sum "$vm_name2" | awk '{print $1}')
     else
         echo Download $_FAILED >&2        
 else 
@@ -109,6 +109,7 @@ vm_dry_run() {
         vm_import
     else
         echo "VM dry run $_FAILED"
+    fi
 }
 
 
