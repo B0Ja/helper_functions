@@ -93,7 +93,7 @@ if [ ! vm_image=="$OVA_NAME" ]; then
 else 
     echo "Selection image is a Kali latest image (default)."
 
-    if "{wget https://images.kali.org/virtual-images/$OVA_NAME -qq --show-progress --progress=bar:force}"; then
+    if "{wget https://images.kali.org/virtual-images/ -O $OVA_NAME -qq --show-progress --progress=bar:force}"; then
         echo Download $_SUCCESS >&2      
         shasum $OVA_NAME | awk '$1=="$hash"{print"...\e[92mChecksum matched.\e[0m"}'
         shasum $OVA_NAME | awk '$1!="$hash"{print"...\e[91mChecksum did not match.\e[0m"}'
