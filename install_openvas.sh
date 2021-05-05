@@ -12,11 +12,9 @@ packages=(“gcc" "g++" "make" "bison" "flex" "libksba-dev" "curl" "redis" "libp
 
 
 #Check to see if the Sudo permissions are provided. 
-require_sudo () {
-    #Stops the script if the user does not have root priviledges and cannot sudo
-    #Additionally, sets $SUDO to "sudo" and $SUDO_E to "sudo -E" if needed.
- 
 
+require_sudo () {
+    
 	if [ "$EUID" -eq 0 ]; then
 	        	SUDO=""
         		SUDO_E=""
@@ -32,28 +30,24 @@ require_sudo () {
 
 require_sudo
 
+
+#Package installer
 install_packages() {
-
-	RETURN_CODE=0
-]
-
-		for package in $[packages[*]]; do
+for package in $[packages[*]]; do
     
-      	if [ '$(which $package)' != "" ]; then
-        
-		    	  echo “  $_MARK Installing $package...”
-     		    sudo apt install -y -qq $package 
-
-			        	if (( $? )); then
-  					        echo “\t$package $_FAILED.” >&2 
-			        	else
-				          	echo “\t$package $_INSTALLED.”
-			        	fi
-	
-	       else
-		           echo “\t$package already $_INSTALLED.”
-	       fi
-    done
+    if [ '$(which $package)' != "" ]; then
+    	echo “  $_MARK Installing $package...”
+	sudo apt install -y -qq $package 
+			        	
+		if (( $? )); then
+  			echo “\t$package $_FAILED.” >&2 
+		else
+			echo “\t$package $_INSTALLED.”
+		fi
+    else
+	echo “\t$package already $_INSTALLED.”
+    fi
+done
 }
-
+install_packages
  
