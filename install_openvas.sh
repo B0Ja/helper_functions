@@ -1,5 +1,7 @@
 #!/bin/bash
 # The script to run and install the OpenVAS application and set it up
+# Reference: https://hedgehogsecurity.co.uk/blog/2020/10/07/installing-openvas/
+# Reference: https://kifarunix.com/install-and-setup-gvm-20-08-on-ubuntu/
  
 #Constants
 _MARK=“[-]”
@@ -49,5 +51,31 @@ for package in $[packages[*]]; do
     fi
 done
 }
+
+#Update system and repositories
+sudo apt update -y -q && sudo apt upgrade -y -qq
 install_packages
  
+
+#Create the User
+sudo useradd -r -d /opt/gvm -c "GVM User" -s /bin/bash gvm
+sudo mkdir /opt/gvm
+sudo chown -R gvm:gvm /opt/gvm
+  
+#Installing Yarn
+sudo curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
+sudo echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list
+apt install yarn -y -qq
+ 
+#Installing Postgres
+apt install -qq -y postgresql postgresql-contrib postgresql-server-dev-all
+
+
+#Work with Postgres
+sudo -Hiu postgres
+
+
+
+
+
+
