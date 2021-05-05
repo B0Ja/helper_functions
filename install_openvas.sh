@@ -73,9 +73,59 @@ apt install -qq -y postgresql postgresql-contrib postgresql-server-dev-all
 
 #Work with Postgres
 sudo -Hiu postgres
+sudo psql -U postgres -c "CREATE USER gvm;"
+sudo psql -U postgres -c "CREATEDB -O gvm gvmd"
+
+sudo psql -U postgres -c "psql gvmd"  
+sudo psql -U postgres -c "create role dba with superuser noinherit;"
+sudo psql -U postgres -c "grant dba to gvm;"
+sudo psql -U postgres -c "create extension \"uuid-ossp\";"
 
 
+#sudo -u postgres bash -c "psql -c \"CREATE USER gvm WITH PASSWORD 'gvm';\""
 
+
+#Ensure the configs stick. Flush + restart
+systemctl restart postgresql
+systemctl enable postgresql
+
+path_to_add="/opt/gvm/bin:/opt/gvm/sbin:/opt/gvm/.local/bin"
+export PATH="$PATH:$path_to_add"
+
+#sudo -u other_user your_command
+
+sudo -u gvm 
+
+sudo -u gvm mkdir /tmp/gvm-source
+sudo -u gvm cd /tmp/gvm-source
+sudo -u gvm git clone -b gvm-libs-11.0 https://github.com/greenbone/gvm-libs.git
+sudo -u gvm git clone https://github.com/greenbone/openvas-smb.git
+sudo -u gvm git clone -b openvas-7.0 https://github.com/greenbone/openvas.git
+sudo -u gvm git clone -b ospd-2.0 https://github.com/greenbone/ospd.git
+sudo -u gvm git clone -b ospd-openvas-1.0 https://github.com/greenbone/ospd-openvas.git
+sudo -u gvm git clone -b gvmd-9.0 https://github.com/greenbone/gvmd.git
+sudo -u gvm git clone -b gsa-9.0 https://github.com/greenbone/gsa.git
+
+
+export PKG_CONFIG_PATH=/opt/gvm/lib/pkgconfig:$PKG_CONFIG_PATH
+
+make_install() {
+mkdir build && cd build 
+cmake .. -DCMAKE_INSTALL_PREFIX=/opt/gvm 
+make && make install
+}
+
+cd "gvm-libs" && make_install
+cd "../../openvas-smb/" && make_install
+cd "../../openvas" && make_install
+
+
+#Configuring VAS
+ldconfig
+sudo cp /tmp/gvm-source/openvas/config/redis-openvas.conf /etc/redis/
+sudo chown redis:redis /etc/redis/redis-openvas.conf
+
+echo "db_address = /run/redis-openvas/redis.sock" &gt; /opt/gvm/etc/openvas/openvas.conf
 
 
 
