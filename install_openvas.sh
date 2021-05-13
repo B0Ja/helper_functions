@@ -127,5 +127,196 @@ sudo chown redis:redis /etc/redis/redis-openvas.conf
 
 echo "db_address = /run/redis-openvas/redis.sock" &gt; /opt/gvm/etc/openvas/openvas.conf
 
+#Edit config files
 
+ldconfig
+sudo cp /tmp/gvm-source/openvas/config/redis-openvas.conf /etc/redis/
+sudo chown redis:redis /etc/redis/redis-openvas.conf
+echo "db_address = /run/redis-openvas/redis.sock" > /opt/gvm/etc/openvas/openvas.conf
+sudo chown gvm:gvm /opt/gvm/etc/openvas/openvas.conf
+sudo user mod -aG redis gvm
+
+#Improving Redis server performance
+echo “net.core.somaxconn = 1024” >> /etc/sysctl.conf
+echo ‘vm.overcommit_memory = 1’ >> /etc/sysctl.conf
+sysctl - p
+
+
+sudo cat > ${/etc/systemd/system}/disable_thp.service <<'_EOF'
+[Unit]
+Description=Disable Kernel Support for Transparent Huge Pages (THP)
+
+[Service]
+Type=simple
+ExecStart=/bin/sh -c "echo 'never' > /sys/kernel/mm/transparent_hugepage/enabled && echo 'never' > /sys/kernel/mm/transparent_hugepage/defrag"
+
+[Install]
+WantedBy=multi-user.target
+_EOF
+## Service file end
+
+
+systemctl daemon-reload
+systemctl enable --now disable_thp
+systemctl enable --now redis-server@openvas
+sudo echo "gvm ALL = NOPASSWD: /opt/gvm/sbin/openvas" > /etc/sudoers.d/gvm
+
+
+#Playing with fire.. editing sudoers
+sudo visudo
+sudo sed ’s/\”Defaults        secure_path=\”/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin\””/\”Defaults        secure_path=\”/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin\:/opt/gvm/sbin\””/g’
+
+
+sudo bash -c 'echo "your_user ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/99_sudo_include_file'
+
+#Configuring User paths
+
+sudo -u gvm greenbone-nvt-sync
+sudo -u gvm openvas –update-vt-info
+sudo -u gvm export PKG_CONFIG_PATH=/opt/gvm/lib/pkgconfig:$PKG_CONFIG_PATH
+sudo -u gvm -bash -c ‘cd gvm-source/gvmd’ && make_install
+sudo -u gvm -bash -c ‘cd ../../gsa’ && make_install
+sudo -Hiu gvm greenbone-feed-sync --type GVMD_DATA
+sudo -Hiu gvm greenbone-feed-sync --type SCAP
+sudo -Hiu gvm greenbone-feed-sync --type CERT3
+sudo -u gvm gvm-manage-certs -a
+sudo -u gvm export PKG_CONFIG_PATH=/opt/gvm/lib/pkgconfig:$PKG_CONFIG_PATH
+sudo -u gvm  -c bash ‘cd /opt/gvm/gvm-source/ospd’
+sudo -u gvm  -c bash ‘ python3 setup.py install --prefix=/opt/gvm’
+
+
+## Create service file
+sudo cat > ${/etc/systemd/system}/openvas.service << '_EOF'
+[Unit]
+Description=Control the OpenVAS service
+After=redis.service
+After=postgresql.service
+
+[Service]
+ExecStartPre=-rm -rf /opt/gvm/var/run/ospd-openvas.pid /opt/gvm/var/run/ospd.sock /opt/gvm/var/run/gvmd.sock
+Type=simple
+User=gvm
+Group=gvm
+Environment=PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/opt/gvm/bin:/opt/gvm/sbin:/opt/gvm/.local/bin
+Environment=PYTHONPATH=/opt/gvm/lib/python3.8/site-packages
+ExecStart=/usr/bin/python3 /opt/gvm/bin/ospd-openvas \
+--pid-file /opt/gvm/var/run/ospd-openvas.pid \
+--log-file /opt/gvm/var/log/gvm/ospd-openvas.log \
+--lock-file-dir /opt/gvm/var/run -u /opt/gvm/var/run/ospd.sock
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
+_EOF
+## Service file end
+
+
+systemctl daemon-reload
+systemctl start openvas
+
+echo -e “… Checking the status of OpenVAS… ”
+systemctl status openvas
+echo -e  “… Enabling OpenVAS”
+systemctl enable openvas
+
+
+## Create service file
+sudo cat > ${/etc/systemd/system}/gsa.service << '_EOF'
+[Unit]
+Description=Control the OpenVAS GSA service
+After=openvas.service
+
+[Service]
+Type=simple
+User=gvm
+Group=gvm
+Environment=PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/opt/gvm/bin:/opt/gvm/sbin:/opt/gvm/.local/bin
+Environment=PYTHONPATH=/opt/gvm/lib/python3.8/site-packages
+ExecStart=/usr/bin/sudo /opt/gvm/sbin/gsad
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
+_EOF
+## Service file end
+
+
+sudo cat > ${/etc/systemd/system}/gsa.path << '_EOF'
+[Unit]
+Description=Start the OpenVAS GSA service when gvmd.sock is available
+
+[Path]
+PathChanged=/opt/gvm/var/run/gvmd.sock
+Unit=gsa.service
+
+[Install]
+WantedBy=multi-user.target
+_EOF
+## Service file end
+
+
+## Create service file
+sudo cat > ${/etc/systemd/system}/gvm.service << ‘_EOF'
+[Unit]
+Description=Control the OpenVAS GVM service
+After=openvas.service
+
+[Service]
+Type=simple
+User=gvm
+Group=gvm
+Environment=PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/opt/gvm/bin:/opt/gvm/sbin:/opt/gvm/.local/bin
+Environment=PYTHONPATH=/opt/gvm/lib/python3.8/site-packages
+ExecStart=/opt/gvm/sbin/gvmd --osp-vt-update=/opt/gvm/var/run/ospd.sock
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
+_EOF
+## Service file end
+
+
+## Create service file
+sudo cat > ${/etc/systemd/system}/gvm.path << '_EOF'
+[Unit]
+Description=Start the OpenVAS GVM service when opsd.sock is available
+
+[Path]
+PathChanged=/opt/gvm/var/run/ospd.sock
+Unit=gvm.service
+
+[Install]
+WantedBy=multi-user.target
+_EOF
+## Service file end
+
+
+#Update and initiate
+sudo systemctl daemon-reload
+sudo systemctl enable --now gvm.{path,service}
+sudo systemctl enable --now gsa.{path,service}
+
+#Checking status
+systemctl status gvm.{path,service}
+systemctl status gsa.{path,service}
+
+sudo -Hiu gvm gvmd --create-scanner="Kifarunix-demo OpenVAS Scanner" --scanner-type="OpenVAS" --scanner-host=/opt/gvm/var/run/ospd.sock
+
+sudo -Hiu gvm gvmd --get-scanners
+
+#Creating user accounts
+echo -e “Creating new user: gmvadmin with password \“Pa$$w0rd\””
+sudo -Hiu gvm gvmd --create-user gvmadmin --password=Pa$$w0rd
+
+#Commands to reset the password
+#sudo -Hiu gvm gvmd --user=<USERNAME> --new-password=<PASSWORD>
+
+#Allow the firewall
+sudo ufw allow 443/tcp
+
+
+echo “Installation completed”
+echo  -n “Log files at /opy/gvm/var/log/gvm :”
+sudo ls /opt/gvm/var/log/gvm
+echo -e “\nAccess the GSA with https:<serverIP-OR-hostname>\n”
 
