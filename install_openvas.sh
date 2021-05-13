@@ -256,7 +256,7 @@ _EOF
 
 
 ## Create service file
-sudo cat > ${/etc/systemd/system}/gvm.service << ‘_EOF'
+sudo cat > ${/etc/systemd/system}/gvm.service << '_EOF'
 [Unit]
 Description=Control the OpenVAS GVM service
 After=openvas.service
