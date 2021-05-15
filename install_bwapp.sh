@@ -5,10 +5,7 @@
 #Check to see if the Sudo permissions are provided.
  
 require_sudo () {
-    #Stops the script if the user does not have root priviledges and cannot sudo
-    #Additionally, sets $SUDO to "sudo" and $SUDO_E to "sudo -E" if needed.
- 
-
+    	#Sets $SUDO to "sudo" and $SUDO_E to "sudo -E" if needed.
 	if [ "$EUID" -eq 0 ]; then
 	        	SUDO=""
         		SUDO_E=""
@@ -21,24 +18,27 @@ require_sudo () {
 		return 0
 	fi
 }
-
 require_sudo
 
 install_tools() {
 
         binary="$1"
-        packages="$2"
-
+        packages=$2
         if [ "$(which $1)" != "" ]
         then
                 for package in $packages; do
                         $SUDO apt -q -y install $package
+			RESULT=$?
+			if [ $RESULT -eq 0 ]; then
+ 				echo "$1 installation successful"
+			else
+				echo "$1 installation failed"
+			fi
                 done
         else
                 echo "$binary is installed"
         fi
 }
-
 
 #Check and Install these
 install_tools mysql "mysql-server"
@@ -46,93 +46,92 @@ install_tools apache2 "apache2"
 install_tools php "php"
 install_tools firefox "firefox"
 
- 
- 
-#Create a temporary directory in the Downloads folder
+#Setting Variables
 user=$USER
-folder='bwapp'
- 
-path='/home/'$user'/Downloads/temp_bwapp'
-path2=$path/$folder
-#path2='/home/'$user'/Downloads/temp_bwapp/bwapp'
- 
- 
-#Check if the directory exists, else create the directory
-if [ ! -d $path ]
-then
-    mkdir -p $path
-fi
- 
-if [ ! -d $path2 ]
-then
-    mkdir -p $path2
-fi
- 
-#Set the version to be downloaded
+
+#Set the version and the directory name
+
+#Version
 filename='bWAPP_latest'
- 
-#Download the file to the temo_bwapp directory
-wget -P $path "http://sourceforge.net/projects/bwapp/files/latest/download" -O $filename
-mv $filename $path
- 
-#Unzip 
-unzip -qq $path/$filename -d $path2
-#unzip '${path}${filename}' .
- 
- 
- 
+
+#If you have problems in downloading the file in lab env,
+#uncomment the below line. Comment the above variable. (Not tested)
+#filename='bWAPPv2.2'
+
+folder='bwapp'
+  
 #Move the files to the Webserver directory
- 
 urlvar1='/var/www/html'
  
-if [ -d /var/www ]
-then
-	if [ -d $urlvar1 ]
-	then
-		sudo -A mv $path2 $urlvar1
+echo "Checking for the Apache install and prerequisites."
+if [ -d $urlvar1 ]; then
+	echo "Apache is installed."
+	if [ ! -d $urlvar1/$folder ]; then
+		$SUDO mkdir -p $urlvar1/$folder
 	else
-     	echo "Webserver directory not created. Check if you have Apache2."
+		echo "Bwapp folder exists."
 	fi
-else
-	echo "WWW folder not found. Is the webserver installed?"
-fi
- 
+ else
+ 	#Check for Apache
+	if [ $(which apache2) = "" ]; then
+		$SUDO apt -qq -y install apache2 && echo "Apache installed"
+	else
+		echo "Unable to install Apache2."
+	fi
+ fi
  
 if [ -d $urlvar1/$folder ]
-then
-        sudo -A mv $path2 $urlvar1		#Move the file
+then	
+	echo Downloading $filename ...	
+	wget "http://sourceforge.net/projects/bwapp/files/latest/download" -O $filename -qq --show-progress
+	$SUDO unzip -qq "/home/$USER/Downloads/$filename" -d "$urlvar1/$folder/" && echo Unzip successful
+	#unzip '$urlvar1/$folder/$filename' .
 	sudo chmod -R 777 $urlvar1	#Giver permissions to the entire folder
-	#sed -i 's/$db_username = "root"\;/$db_username = "bee"\;/g'	#Change username from default Root to Bee
-	#sed -i 's/$db_password = ""\;/$db_password = "bug"\;/g'
+	echo "Changing the Admin settings: "
+	sed -i 's/$db_username = "root"\;/$db_username = "bee"\;/g' "$urlvar1/$folder/bWAPP/admin/settings.php"	&& echo Change username from default Root to \“bee\”
+	sed -i 's/$db_password = ""\;/$db_password = "bug"\;/g'	"$urlvar1/$folder/bWAPP/admin/settings.php" && echo Change the password to “bug”
   
 else
 	echo "Unable to copy to Webserver directory"
+	echo "Checking and installing webserver"
+	if [ "$(which apache2)" = "" ]
+        then
+		$SUDO apt -qq -y install apache2 && echo "Apache2 installed"
+        else
+                echo "Unable to install Apache2."
+        fi
+
 fi
 
  
 #Start the services
 sudo service mysql start
 sudo service apache2 start
- 
-#Start MySQL server and login
-mysql -u root -p
- 
-#Manage MySQL 
-create_user="create user 'bee'@'localhost' identified by 'bug';"
-grant_rights="grant all privileges on *.* to 'bee'@'localhost';"
- 
-#Creating user
-mysql -u root -p -e "$create_user"  && echo "**User created: Username: bee; Password: bug**"
-echo " "
-echo " "
-mysql -u root -p -e "$grant_rights" $$ echo "**Rights granted to user Bee**"
- 
- 
+  
+#Start and Manage MySQL 
+
+#Queries
+create_user="CREATE USER 'bee'@'localhost' IDENTIFIED BY 'bug';"
+grant_rights="GRANT ALL PRIVILEGES ON *.* TO 'bee'@'localhost';"
+
+#Queries that helps during reinstall
+#Drops the users, so it is created afresh
+drop_user="DROP USER bee@localhost;"
+drop_db="DROP DATABASE bWAPP;"
+
+#Creating environment
+#mysql --user=root -p -e "create database bWAPP;"
+mysql --user=root -p -e "$drop_user; $drop_db; FLUSH PRIVILEGES;"
+mysql --user=root -p -e "$create_user"  && echo "** User created: Username: bee; Password: bug **"
+mysql --user=root -p -e "$grant_rights"  && echo "** Rights granted for: Username: bee; Password: bug **"
+
+#Activating privileges
+mysql --user=root -p -e "FLUSH PRIVILEGES;"  && echo "Activating privileges..."
+
 #Restart the services
 sudo service mysql restart
 sudo service apache2 restart
  
 #start the browser for final installation
 firefox localhost/bwapp/bWAPP/install.php
- 
-#EOS
+#EOF

@@ -1,0 +1,8 @@
+# Just a collection of useful functions to build up off.
+# Not duplicated with the Chreeytree file
+
+#Good formating of bash shell outputs
+(printf "PERM LINKS OWNDER GROUP SIZE MONTH DAY ";\
+printf "HH:MM/YEAR NAME\n" ; \
+ls -l |sed id) | column -t
+#from the manpage of column
