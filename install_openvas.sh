@@ -300,7 +300,7 @@ sudo systemctl enable --now gsa.{path,service}
 systemctl status gvm.{path,service}
 systemctl status gsa.{path,service}
 
-sudo -Hiu gvm gvmd --create-scanner="Kifarunix-demo OpenVAS Scanner" --scanner-type="OpenVAS" --scanner-host=/opt/gvm/var/run/ospd.sock
+sudo -Hiu gvm gvmd --create-scanner="OpenVAS Scanner" --scanner-type="OpenVAS" --scanner-host=/opt/gvm/var/run/ospd.sock
 
 sudo -Hiu gvm gvmd --get-scanners
 
